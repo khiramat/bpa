@@ -1,0 +1,76 @@
+<?php
+if (!defined('BASEPATH')) exit('No direct script access allowed');
+
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+
+require_once FCPATH . "vendor/autoload.php"; // zz added
+
+class Excel_reader {
+    
+    /**
+     * excel work sheet
+     * @var Worksheet 
+     */
+    private $sheet;
+
+    /**
+     * set file
+     * 
+     * @param string $filepath
+     */
+    function set_file($filepath)
+    {
+        $readerType = pathinfo($filepath)['extension'];
+        if (strcasecmp($readerType, 'xls') == 0)
+        {
+            $readerType = 'Xls';
+        }
+        else if (strcasecmp($readerType, 'xlsx') == 0)
+        {
+            $readerType = 'Xlsx';
+        }
+        else if (strcasecmp($readerType, 'csv') == 0)
+        {
+            $readerType = 'Csv';
+        }
+        else
+        {
+            die('Error loading file: ' . $filepath);
+        }
+        $reader = IOFactory::createReader($readerType);
+        $this->sheet = $reader->load($filepath)->getSheet(0);
+    }
+
+    function get_count()
+    {
+        return $this->sheet->getHighestRow();
+    }
+
+    function get_line($line_number)
+    {
+        $row_data = array();
+        $row = $this->sheet->getRowIterator($line_number, $line_number)->current();
+        if ($row)
+        {
+            foreach ($row->getCellIterator() as $cell)
+            {
+                array_push($row_data, trim($cell->getValue()));
+            }
+        }
+        return $row_data;
+    }
+
+    function get_all_lines()
+    {
+        $result = NULL;
+        $i = 0;
+        foreach ($this->sheet->getRowIterator() as $row)
+        {
+            $result[$i] = $this->get_line($i + 1);
+            $i++;
+        }
+        
+        return $result;
+    }
+}

@@ -1,0 +1,4 @@
+*/5 * * * * php /Library/WebServer/Documents/bpa/index.php cli/Batch_acs to_input_list_table execute_input_call
+
+1. crontab -e
+2. copy & paste
